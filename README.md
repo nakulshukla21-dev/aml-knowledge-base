@@ -1,22 +1,34 @@
 # AML Regulatory Knowledge Base
 
-An AI-powered chatbot that enables natural language Q&A across multiple AML/KYC regulatory documents using RAG (Retrieval Augmented Generation).
+An AI-powered chatbot for querying AML/financial crime regulatory documents using RAG (Retrieval Augmented Generation). Upload documents from multiple jurisdictions, select your professional persona, and have a multi-turn conversation across your entire document set.
 
-## What it does
-Upload multiple regulatory PDFs (FATF recommendations, FinCEN advisories, OFAC guidance) and ask questions across all of them simultaneously. The system retrieves the most relevant sections and generates accurate, sourced answers using Claude.
+## Features
 
-## Why it matters
-Compliance teams spend significant time manually searching across multiple regulatory documents. This tool demonstrates how RAG-based AI can dramatically accelerate regulatory research in financial institutions.
+- **Multi-turn chat** — Conversational interface with full session history. Follow-up questions understand prior context.
+- **Auto compliance check** — Each uploaded document is screened by Claude Haiku before indexing. Non-AML documents are rejected with a reason.
+- **Auto jurisdiction detection** — Jurisdiction(s) are detected from document content (US, UK, EU, India, Japan, Global). A single document can span multiple jurisdictions.
+- **3 professional personas** — Answers are tailored to your role:
+  - *Compliance Officer* — practical obligations, thresholds, examination risk
+  - *RegTech Product Manager* — product specs, data fields, workflow logic, edge cases
+  - *Policy & Regulatory Affairs Analyst* — regulatory intent, cross-jurisdictional comparisons, interpretive nuance
+- **Cross-jurisdictional queries** — Ask questions across documents from different jurisdictions in a single query
+- **Confidence scoring** — Every answer shows a relevance score (%) and High/Medium/Low classification based on how well the retrieved chunks support the answer
+- **Streaming responses** — Answers stream word-by-word in real time
+- **Multi-format export** — Export the full chat as Markdown, Word (.docx), or PDF — includes metadata, confidence scores, and sources per answer
 
 ## Tech Stack
 
-| Component | Library |
+| Component | Detail |
 |---|---|
 | UI | Streamlit |
-| LLM | Claude Sonnet (`claude-sonnet-4-6`) via LangChain Anthropic |
+| LLM | Claude Sonnet 4.6 (`claude-sonnet-4-6`) |
+| Compliance & jurisdiction check | Claude Haiku 4.5 (`claude-haiku-4-5`) |
+| Question rephrasing | Claude Haiku 4.5 (fast, cheap condense step) |
 | Embeddings | Voyage AI (`voyage-3`) |
-| Vector Store | ChromaDB |
-| PDF Loader | LangChain PyPDFLoader |
+| Vector store | ChromaDB (in-memory, per session) |
+| Orchestration | LangChain (`ConversationalRetrievalChain`) |
+| PDF export | fpdf2 + system Arial font |
+| Word export | python-docx |
 
 ## Setup
 
@@ -34,7 +46,7 @@ Compliance teams spend significant time manually searching across multiple regul
 
 3. **Install dependencies**
    ```bash
-   pip install streamlit voyageai langchain langchain-anthropic langchain-community langchain-chroma langchain-text-splitters langchain-classic pypdf python-dotenv chromadb
+   pip install -r requirements.txt
    ```
 
 4. **Set API keys** — create a `.env` file in the project root:
@@ -50,11 +62,18 @@ Compliance teams spend significant time manually searching across multiple regul
 
 ## Usage
 
-1. Upload one or more regulatory PDFs using the file uploader
-2. Click **Build Knowledge Base** to chunk and index the documents
-3. (Optional) Click **Summarize Documents** for a structured summary of each file
-4. Once the knowledge base is built, type a question in the Q&A box to query across all documents
+1. **Upload PDFs** in the sidebar — English-language AML/regulatory documents only
+2. The app automatically screens each document for compliance relevance and detects its jurisdiction(s)
+3. **Select a persona** in the sidebar to tailor the style and framing of answers
+4. **Chat** — ask questions across all indexed documents. Cross-jurisdictional questions work out of the box
+5. **Export** the conversation via the Export chat button (Markdown / Word / PDF)
+
+## Notes
+
+- Session state is in-memory — documents and chat history reset on page refresh (Streamlit limitation)
+- PDF export uses Windows Arial font; Linux deployments may need font path adjustments
+- English documents only — no translation or multi-language support
 
 ## Security
 
-API keys are loaded from a `.env` file and never committed. The `.gitignore` excludes all `.env` files and the local ChromaDB store.
+API keys are loaded from `.env` and never committed. The `.gitignore` excludes all `.env` files and the local ChromaDB store.
