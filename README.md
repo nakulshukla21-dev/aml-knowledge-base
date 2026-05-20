@@ -1,13 +1,12 @@
 # AML Regulatory Knowledge Base
 
-A Streamlit app for uploading AML/regulatory PDFs (FATF, FinCEN, OFAC, etc.), building a searchable vector knowledge base, and asking questions across all documents using Claude.
+An AI-powered chatbot that enables natural language Q&A across multiple AML/KYC regulatory documents using RAG (Retrieval Augmented Generation).
 
-## Features
+## What it does
+Upload multiple regulatory PDFs (FATF recommendations, FinCEN advisories, OFAC guidance) and ask questions across all of them simultaneously. The system retrieves the most relevant sections and generates accurate, sourced answers using Claude.
 
-- Upload multiple PDF regulatory documents at once
-- Build a vector knowledge base powered by Voyage AI embeddings and ChromaDB
-- Summarize each document with structured coverage (purpose, definitions, requirements, thresholds, penalties)
-- Ask natural language questions across all indexed documents with source attribution
+## Why it matters
+Compliance teams spend significant time manually searching across multiple regulatory documents. This tool demonstrates how RAG-based AI can dramatically accelerate regulatory research in financial institutions.
 
 ## Tech Stack
 
