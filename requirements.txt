@@ -1,0 +1,14 @@
+streamlit
+voyageai
+langchain
+langchain-anthropic
+langchain-community
+langchain-chroma
+langchain-text-splitters
+langchain-core
+langchain-classic
+chromadb
+pypdf
+python-dotenv
+python-docx
+fpdf2
