@@ -122,3 +122,7 @@ Ask a question
 ## Security
 
 API keys are loaded from `.env` and never committed. The `.gitignore` excludes all `.env` files and the local ChromaDB store.
+
+## Author
+
+**Nakul Shukla** — Product Manager, AI/ML & RegTech | [LinkedIn](https://www.linkedin.com/in/nakul-shukla-62961853/)
