@@ -6,8 +6,8 @@ langchain-community
 langchain-chroma
 langchain-text-splitters
 langchain-core
-langchain-classic
-chromadb
+chromadb>=0.5.23,<1.0
+protobuf>=4.21.0,<6
 pypdf
 python-dotenv
 python-docx

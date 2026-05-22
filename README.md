@@ -99,6 +99,16 @@ Ask a question
 | Clear chat | Chat only — documents stay indexed |
 | Reset knowledge base | Documents, index, and chat |
 
+## Deploying on Streamlit Community Cloud
+
+1. Deploy from your GitHub repo with entrypoint `rag_app.py`
+2. **Use Python 3.12** — ChromaDB does not work on Python 3.14. In **Advanced settings** at deploy time, select **3.12**. If the app was already deployed on 3.14, delete and redeploy (Python version cannot be changed after deploy).
+3. Add secrets in **Advanced settings → Secrets** (or app Settings → Secrets):
+   ```toml
+   ANTHROPIC_API_KEY = "your_key"
+   VOYAGE_API_KEY = "your_key"
+   ```
+
 ## Notes
 
 - Session state is in-memory — documents and chat history reset on page refresh (Streamlit limitation)
