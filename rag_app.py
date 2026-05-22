@@ -9,6 +9,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
+import chromadb
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_core.prompts import PromptTemplate
@@ -457,6 +458,17 @@ Answer:""",
     return PromptTemplate(input_variables=["context", "question"], template=templates[persona])
 
 
+def create_vectorstore(docs: list[Document], embeddings: VoyageEmbeddings, file_hash: str) -> Chroma:
+    """In-memory Chroma — avoids SQLite persistence issues on Streamlit Cloud."""
+    client = chromadb.EphemeralClient()
+    return Chroma.from_documents(
+        docs,
+        embeddings,
+        collection_name=f"kb_{file_hash[:16]}",
+        client=client,
+    )
+
+
 def clear_knowledge_base() -> None:
     for key in ("vectorstore", "indexed_hash", "indexed_docs", "messages", "chat_history", "chat_index_hash"):
         st.session_state.pop(key, None)
@@ -531,11 +543,7 @@ with st.sidebar:
                     clear_knowledge_base()
                 else:
                     embeddings = VoyageEmbeddings(model="voyage-3")
-                    st.session_state.vectorstore = Chroma.from_documents(
-                        all_docs,
-                        embeddings,
-                        collection_name=f"kb_{file_hash[:16]}",
-                    )
+                    st.session_state.vectorstore = create_vectorstore(all_docs, embeddings, file_hash)
                     st.session_state.indexed_hash = file_hash
                     st.session_state.indexed_docs = accepted
                     st.session_state.messages = []
