@@ -8,12 +8,11 @@ import voyageai
 from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_chroma import Chroma
-import chromadb
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_core.prompts import PromptTemplate
 from langchain_core.callbacks import BaseCallbackHandler
+from langchain_core.vectorstores import InMemoryVectorStore
 from dotenv import load_dotenv
 import tempfile
 
@@ -163,21 +162,12 @@ def condense_question(question: str, chat_history: list[tuple[str, str]], llm) -
     return rewritten or question
 
 
-def get_header_documents(vectorstore) -> list[Document]:
-    try:
-        records = vectorstore.get(where={"chunk_type": "header"})
-    except Exception:
-        return []
-    if not records or not records.get("documents"):
-        return []
-    return [
-        Document(page_content=content, metadata=meta or {})
-        for content, meta in zip(records["documents"], records["metadatas"])
-    ]
-
-
-def retrieve_documents(vectorstore, question: str, k: int = 10) -> list[Document]:
-    header_docs = get_header_documents(vectorstore)
+def retrieve_documents(
+    vectorstore: InMemoryVectorStore,
+    header_docs: list[Document],
+    question: str,
+    k: int = 10,
+) -> list[Document]:
     body_docs = vectorstore.similarity_search(question, k=k)
 
     seen: set[str] = set()
@@ -458,19 +448,26 @@ Answer:""",
     return PromptTemplate(input_variables=["context", "question"], template=templates[persona])
 
 
-def create_vectorstore(docs: list[Document], embeddings: VoyageEmbeddings, file_hash: str) -> Chroma:
-    """In-memory Chroma — avoids SQLite persistence issues on Streamlit Cloud."""
-    client = chromadb.EphemeralClient()
-    return Chroma.from_documents(
-        docs,
-        embeddings,
-        collection_name=f"kb_{file_hash[:16]}",
-        client=client,
-    )
+def create_vectorstore(
+    docs: list[Document], embeddings: VoyageEmbeddings
+) -> tuple[InMemoryVectorStore, list[Document]]:
+    """Pure in-memory vector store — no Chroma/SQLite, works reliably on Streamlit Cloud."""
+    header_docs = [d for d in docs if d.metadata.get("chunk_type") == "header"]
+    body_docs = [d for d in docs if d.metadata.get("chunk_type") != "header"]
+    vectorstore = InMemoryVectorStore.from_documents(body_docs, embeddings)
+    return vectorstore, header_docs
 
 
 def clear_knowledge_base() -> None:
-    for key in ("vectorstore", "indexed_hash", "indexed_docs", "messages", "chat_history", "chat_index_hash"):
+    for key in (
+        "vectorstore",
+        "header_documents",
+        "indexed_hash",
+        "indexed_docs",
+        "messages",
+        "chat_history",
+        "chat_index_hash",
+    ):
         st.session_state.pop(key, None)
 
 
@@ -543,7 +540,9 @@ with st.sidebar:
                     clear_knowledge_base()
                 else:
                     embeddings = VoyageEmbeddings(model="voyage-3")
-                    st.session_state.vectorstore = create_vectorstore(all_docs, embeddings, file_hash)
+                    vectorstore, header_docs = create_vectorstore(all_docs, embeddings)
+                    st.session_state.vectorstore = vectorstore
+                    st.session_state.header_documents = header_docs
                     st.session_state.indexed_hash = file_hash
                     st.session_state.indexed_docs = accepted
                     st.session_state.messages = []
@@ -711,6 +710,7 @@ else:
             )
             source_documents = retrieve_documents(
                 st.session_state.vectorstore,
+                st.session_state.get("header_documents", []),
                 search_query,
                 k=10,
             )

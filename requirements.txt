@@ -3,11 +3,8 @@ voyageai
 langchain
 langchain-anthropic
 langchain-community
-langchain-chroma
 langchain-text-splitters
 langchain-core
-chromadb>=0.5.23,<1.0
-protobuf>=4.21.0,<6
 pypdf
 python-dotenv
 python-docx

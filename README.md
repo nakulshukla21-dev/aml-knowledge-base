@@ -29,7 +29,7 @@ An AI-powered chatbot for querying AML/financial crime regulatory documents usin
 Upload PDFs
   → screen for AML relevance + detect jurisdiction/institution (Haiku)
   → split into header + body chunks
-  → embed with Voyage and store in in-memory ChromaDB
+  → embed with Voyage and store in an in-memory vector index
 
 Ask a question
   → rewrite follow-ups into standalone queries (Haiku)
@@ -47,7 +47,7 @@ Ask a question
 | Answer generation | Claude Sonnet 4.6 (`claude-sonnet-4-6`) |
 | Document screening, institution extraction, question condensing, confidence evaluation | Claude Haiku 4.5 (`claude-haiku-4-5`) |
 | Embeddings | Voyage AI (`voyage-3`) |
-| Vector store | ChromaDB (in-memory, per session) |
+| Vector store | LangChain `InMemoryVectorStore` (per session) |
 | PDF loading | LangChain `PyPDFLoader` + `pypdf` |
 | Orchestration | LangChain (custom retrieve → format → answer flow) |
 | Word export | python-docx |
@@ -105,7 +105,7 @@ Ask a question
 ## Deploying on Streamlit Community Cloud
 
 1. Deploy from your GitHub repo with entrypoint `rag_app.py`
-2. **Use Python 3.12** — ChromaDB does not work on Python 3.14. In **Advanced settings** at deploy time, select **3.12**. If the app was already deployed on 3.14, delete and redeploy (Python version cannot be changed after deploy).
+2. **Use Python 3.12** — recommended for Streamlit Community Cloud. In **Advanced settings** at deploy time, select **3.12**.
 3. Add secrets in **Advanced settings → Secrets** (or app Settings → Secrets):
    ```toml
    ANTHROPIC_API_KEY = "your_key"
@@ -121,7 +121,7 @@ Ask a question
 
 ## Security
 
-API keys are loaded from `.env` and never committed. The `.gitignore` excludes all `.env` files and the local ChromaDB store.
+API keys are loaded from `.env` and never committed. The `.gitignore` excludes all `.env` files.
 
 ## Author
 
