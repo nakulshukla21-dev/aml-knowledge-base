@@ -2,7 +2,8 @@
 
 An AI-powered chatbot for querying AML/financial crime regulatory documents using RAG (Retrieval Augmented Generation). Upload documents from multiple jurisdictions, select your professional persona, and have a multi-turn conversation across your entire document set.
 
-**Live app:** [https://bit.ly/aml-knowledge-base](https://bit.ly/aml-knowledge-base)
+## Live Demo
+[Try it here](https://bit.ly/aml-knowledge-base)
 
 ## Features
 
